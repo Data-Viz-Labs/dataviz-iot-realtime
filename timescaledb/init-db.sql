@@ -10,6 +10,9 @@ GRANT ALL PRIVILEGES ON DATABASE iotdata TO iotuser;
 -- Connect to the iotdata database
 \c iotdata
 
+-- Create TimescaleDB extension
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
 -- Grant privileges on all tables in schema public to iotuser
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO iotuser;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO iotuser;
@@ -48,6 +51,9 @@ CREATE TABLE IF NOT EXISTS sensor_data (
     event_type event_type
 );
 
+-- Convert to hypertable
+SELECT create_hypertable('sensor_data', 'time');
+
 -- Create indexes
 CREATE INDEX ON sensor_data (device_id, time DESC);
 CREATE INDEX ON sensor_data (status);
@@ -60,9 +66,3 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO CURRENT_USER
 
 -- Allow creating new tables (needed for TimescaleDB hypertables)
 GRANT CREATE ON SCHEMA public TO CURRENT_USER;
-
--- Create TimescaleDB extension
---CREATE EXTENSION IF NOT EXISTS timescaledb;
-
--- Convert to hypertable
-SELECT create_hypertable('sensor_data', 'time');
