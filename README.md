@@ -34,11 +34,6 @@ Access points:
 - URL: http://localhost:3001
 - Configure on first access with your desired credentials
 
-### Superset
-- URL: http://localhost:8088
-- Username: admin
-- Password: admin
-
 ### Database Connection Details
 When configuring data sources manually:
 - Host: timescaledb

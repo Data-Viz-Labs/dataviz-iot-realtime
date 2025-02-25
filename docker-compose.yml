@@ -39,15 +39,6 @@ services:
       MB_DB_PASS: iotpass
       MB_DB_HOST: timescaledb
 
-  superset:
-    image: docker.io/apache/superset:latest
-    ports:
-      - "8088:8088"
-    environment:
-      SUPERSET_SECRET_KEY: your_secret_key_here
-    volumes:
-      - superset_data:/app/superset_home
-
   data_generator:
     build: 
       context: ./data_generator

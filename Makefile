@@ -40,8 +40,5 @@ shell-grafana:
 shell-metabase:
 	$(COMPOSE_CMD) exec metabase bash
 
-shell-superset:
-	$(COMPOSE_CMD) exec superset bash
-
 shell-generator:
 	$(COMPOSE_CMD) exec data_generator bash
