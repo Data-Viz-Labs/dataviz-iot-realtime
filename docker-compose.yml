@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   timescaledb:
-    image: timescale/timescaledb:latest-pg14
+    image: docker.io/timescale/timescaledb:latest-pg14
     environment:
       POSTGRES_DB: iotdata
       POSTGRES_USER: iotuser
@@ -13,7 +13,7 @@ services:
       - timescaledb_data:/var/lib/postgresql/data
 
   grafana:
-    image: grafana/grafana:latest
+    image: docker.io/grafana/grafana:latest
     ports:
       - "3000:3000"
     environment:
@@ -22,7 +22,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   metabase:
-    image: metabase/metabase:latest
+    image: docker.io/metabase/metabase:latest
     ports:
       - "3001:3000"
     environment:
@@ -34,7 +34,7 @@ services:
       MB_DB_HOST: timescaledb
 
   superset:
-    image: apache/superset:latest
+    image: docker.io/apache/superset:latest
     ports:
       - "8088:8088"
     environment:
