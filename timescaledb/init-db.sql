@@ -48,9 +48,6 @@ CREATE TABLE IF NOT EXISTS sensor_data (
     event_type event_type
 );
 
--- Convert to hypertable
-SELECT create_hypertable('sensor_data', 'time');
-
 -- Create indexes
 CREATE INDEX ON sensor_data (device_id, time DESC);
 CREATE INDEX ON sensor_data (status);
@@ -65,4 +62,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO CURRENT_USER
 GRANT CREATE ON SCHEMA public TO CURRENT_USER;
 
 -- Create TimescaleDB extension
-CREATE EXTENSION IF NOT EXISTS timescaledb;
+--CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+-- Convert to hypertable
+SELECT create_hypertable('sensor_data', 'time');
