@@ -48,13 +48,13 @@ def ensure_device_exists(device_id):
                 text("""
                 INSERT INTO devices (device_id, location_name)
                 VALUES (:device_id, :location)
-                ON CONFLICT (device_id) DO NOTHING
                 """),
                 {"device_id": device_id, "location": location}
             )
         return True
     except Exception as e:
         logger.error(f"Error ensuring device {device_id} exists: {e}")
+        exit(1)
         return False
 
 def generate_location():
@@ -101,9 +101,14 @@ def main():
         try:
             data = generate_sensor_data()
             device_id = data['device_id']
+
+            print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+            print(device_id)
             
             # Ensure device exists before inserting sensor data
             ensure_device_exists(device_id)
+
+            print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
             
             # Insert sensor data
             with engine.connect() as conn:
