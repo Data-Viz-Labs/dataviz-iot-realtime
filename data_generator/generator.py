@@ -3,8 +3,14 @@ import random
 from datetime import datetime
 from faker import Faker
 import numpy as np
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import os
+import logging
+from sqlalchemy.exc import OperationalError
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize Faker
 fake = Faker()
@@ -19,36 +25,37 @@ DB_PASS = os.getenv('DB_PASS', 'iotpass')
 db_url = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:5432/{DB_NAME}'
 engine = create_engine(db_url)
 
-def create_tables():
-    """Create necessary database tables"""
+def wait_for_db(max_retries=30, delay_seconds=2):
+    """Wait for database to be ready"""
+    for attempt in range(max_retries):
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+                logger.info("Database is ready!")
+                return True
+        except OperationalError as e:
+            logger.warning(f"Database not ready (attempt {attempt + 1}/{max_retries}): {e}")
+            time.sleep(delay_seconds)
+    
+    raise Exception("Could not connect to the database")
+
+def ensure_devices_exist(num_devices=100):
+    """Ensure device records exist in the devices table"""
     with engine.connect() as conn:
-        # Create extension if it doesn't exist
-        conn.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
-        
-        # Create sensor_data table
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS sensor_data (
-                time TIMESTAMPTZ NOT NULL,
-                device_id VARCHAR(50),
-                temperature FLOAT,
-                humidity FLOAT,
-                pressure FLOAT,
-                latitude FLOAT,
-                longitude FLOAT,
-                status VARCHAR(20),
-                event_type VARCHAR(50)
-            );
-        """)
-        
-        # Convert to hypertable
-        conn.execute("""
-            SELECT create_hypertable('sensor_data', 'time', 
-                                   if_not_exists => TRUE);
-        """)
+        for i in range(1, num_devices + 1):
+            device_id = f"DEVICE_{i}"
+            location = fake.city()
+            conn.execute(
+                text("""
+                INSERT INTO devices (device_id, location_name)
+                VALUES (:device_id, :location)
+                ON CONFLICT (device_id) DO NOTHING
+                """),
+                {"device_id": device_id, "location": location}
+            )
 
 def generate_location():
     """Generate random location within Iberian Peninsula"""
-    # Approximate boundaries of Iberian Peninsula
     lat = random.uniform(36.0, 43.8)
     lon = random.uniform(-9.5, 3.3)
     return lat, lon
@@ -83,31 +90,34 @@ def generate_sensor_data():
 
 def main():
     """Main function to generate and insert data"""
-    print("Creating tables...")
-    create_tables()
+    logger.info("Waiting for database to be ready...")
+    wait_for_db()
     
-    print("Starting data generation...")
+    logger.info("Ensuring devices exist...")
+    ensure_devices_exist()
+    
+    logger.info("Starting data generation...")
     while True:
         try:
             data = generate_sensor_data()
             with engine.connect() as conn:
                 conn.execute(
-                    """
+                    text("""
                     INSERT INTO sensor_data (
                         time, device_id, temperature, humidity, 
                         pressure, latitude, longitude, status, event_type
                     ) VALUES (
-                        %(time)s, %(device_id)s, %(temperature)s, 
-                        %(humidity)s, %(pressure)s, %(latitude)s, 
-                        %(longitude)s, %(status)s, %(event_type)s
+                        :time, :device_id, :temperature, 
+                        :humidity, :pressure, :latitude, 
+                        :longitude, :status, :event_type
                     )
-                    """,
+                    """),
                     data
                 )
             time.sleep(1)  # Generate data every second
             
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
             time.sleep(5)  # Wait before retrying
 
 if __name__ == "__main__":
