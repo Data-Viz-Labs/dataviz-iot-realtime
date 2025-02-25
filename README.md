@@ -69,3 +69,73 @@ The simulated IoT data includes:
 1. Create a real-time monitoring dashboard in Grafana
 2. Build an analytical dashboard in Metabase for historical analysis
 3. Analyze sensor data patterns and anomalies
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Database Connection Problems
+
+If the data generator can't connect to the database:
+
+1. Check if the TimescaleDB container is running:
+   ```bash
+   make ps
+   ```
+
+2. Use the debug script to test database connectivity:
+   ```bash
+   docker-compose run data_generator python debug.py
+   ```
+
+3. Access the database shell to verify the schema:
+   ```bash
+   make shell-db
+   # Then inside the container:
+   psql -U iotuser -d iotdata -c "\dt"
+   ```
+
+#### Data Not Appearing in Visualizations
+
+1. Verify data is being generated:
+   ```bash
+   make logs data_generator
+   ```
+
+2. Check if data exists in the database:
+   ```bash
+   make shell-db
+   # Then inside the container:
+   psql -U iotuser -d iotdata -c "SELECT COUNT(*) FROM sensor_data;"
+   ```
+
+3. For Grafana issues, verify the data source configuration:
+   - Access Grafana at http://localhost:3000
+   - Go to Configuration > Data Sources
+   - Check the TimescaleDB connection settings
+
+### Utility Scripts
+
+The repository includes several utility scripts to help with debugging and setup:
+
+- **bin/debug-db.sh**: Provides commands to access and verify the database schema and data
+- **data_generator/debug.py**: Tests database connectivity and inserts a test device
+
+### Logs and Monitoring
+
+To view logs from all services:
+```bash
+make logs
+```
+
+To view logs from a specific service:
+```bash
+docker-compose logs timescaledb
+```
+
+For more detailed database diagnostics:
+```bash
+make shell-db
+# Then inside the container:
+psql -U iotuser -d iotdata -c "SELECT pg_size_pretty(pg_database_size('iotdata'));"
+```
