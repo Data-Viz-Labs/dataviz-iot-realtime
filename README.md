@@ -13,8 +13,8 @@ This project provides a real-time IoT data visualization environment using multi
 ## Quick Start
 
 Requirements:
-- Docker
-- Docker Compose
+- Docker/Podman
+- Docker Compose/Podman Compose
 - Make
 
 To start all services:
@@ -24,9 +24,28 @@ make start
 ```
 
 Access points:
-- Grafana: http://localhost:3000
-- Metabase: http://localhost:3001
-- Superset: http://localhost:8088
+
+### Grafana
+- URL: http://localhost:3000
+- Username: admin
+- Password: admin
+
+### Metabase
+- URL: http://localhost:3001
+- Configure on first access with your desired credentials
+
+### Superset
+- URL: http://localhost:8088
+- Username: admin
+- Password: admin
+
+### Database Connection Details
+When configuring data sources manually:
+- Host: timescaledb
+- Port: 5432
+- Database: iotdata
+- Username: iotuser
+- Password: iotpass
 
 ## Project Structure
 
