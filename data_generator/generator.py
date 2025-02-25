@@ -41,18 +41,31 @@ def wait_for_db(max_retries=30, delay_seconds=2):
 
 def ensure_devices_exist(num_devices=100):
     """Ensure device records exist in the devices table"""
+    logger.info(f"Ensuring {num_devices} devices exist in the database...")
+    
+    # Create a list of all device IDs we'll be using
+    device_ids = [f"DEVICE_{i}" for i in range(1, num_devices + 1)]
+    
     with engine.connect() as conn:
-        for i in range(1, num_devices + 1):
-            device_id = f"DEVICE_{i}"
-            location = fake.city()
-            conn.execute(
-                text("""
-                INSERT INTO devices (device_id, location_name)
-                VALUES (:device_id, :location)
-                ON CONFLICT (device_id) DO NOTHING
-                """),
-                {"device_id": device_id, "location": location}
-            )
+        # First, check which devices already exist
+        result = conn.execute(text("SELECT device_id FROM devices"))
+        existing_devices = {row[0] for row in result}
+        
+        # Create devices that don't exist yet
+        for device_id in device_ids:
+            if device_id not in existing_devices:
+                location = fake.city()
+                logger.info(f"Creating device {device_id} at {location}")
+                conn.execute(
+                    text("""
+                    INSERT INTO devices (device_id, location_name)
+                    VALUES (:device_id, :location)
+                    ON CONFLICT (device_id) DO NOTHING
+                    """),
+                    {"device_id": device_id, "location": location}
+                )
+    
+    logger.info("Device initialization complete")
 
 def generate_location():
     """Generate random location within Iberian Peninsula"""
@@ -94,7 +107,7 @@ def main():
     wait_for_db()
     
     logger.info("Ensuring devices exist...")
-    ensure_devices_exist()
+    ensure_devices_exist(100)  # Asegurarse de que existan 100 dispositivos
     
     logger.info("Starting data generation...")
     while True:
