@@ -1,0 +1,8 @@
+# AWS region to deploy resources
+aws_region = "eu-west-1"
+
+# Number of EC2 instances to create (max 20)
+instance_count = 5
+
+# IP address allowed to connect to instances
+allowed_ip = "83.32.191.143/32"
