@@ -39,33 +39,23 @@ def wait_for_db(max_retries=30, delay_seconds=2):
     
     raise Exception("Could not connect to the database")
 
-def ensure_devices_exist(num_devices=100):
-    """Ensure device records exist in the devices table"""
-    logger.info(f"Ensuring {num_devices} devices exist in the database...")
-    
-    # Create a list of all device IDs we'll be using
-    device_ids = [f"DEVICE_{i}" for i in range(1, num_devices + 1)]
-    
-    with engine.connect() as conn:
-        # First, check which devices already exist
-        result = conn.execute(text("SELECT device_id FROM devices"))
-        existing_devices = {row[0] for row in result}
-        
-        # Create devices that don't exist yet
-        for device_id in device_ids:
-            if device_id not in existing_devices:
-                location = fake.city()
-                logger.info(f"Creating device {device_id} at {location}")
-                conn.execute(
-                    text("""
-                    INSERT INTO devices (device_id, location_name)
-                    VALUES (:device_id, :location)
-                    ON CONFLICT (device_id) DO NOTHING
-                    """),
-                    {"device_id": device_id, "location": location}
-                )
-    
-    logger.info("Device initialization complete")
+def ensure_device_exists(device_id):
+    """Ensure a specific device exists in the database"""
+    location = fake.city()
+    try:
+        with engine.connect() as conn:
+            conn.execute(
+                text("""
+                INSERT INTO devices (device_id, location_name)
+                VALUES (:device_id, :location)
+                ON CONFLICT (device_id) DO NOTHING
+                """),
+                {"device_id": device_id, "location": location}
+            )
+        return True
+    except Exception as e:
+        logger.error(f"Error ensuring device {device_id} exists: {e}")
+        return False
 
 def generate_location():
     """Generate random location within Iberian Peninsula"""
@@ -90,8 +80,8 @@ def generate_sensor_data():
     ])
     
     return {
-        'time': datetime.utcnow(),
         'device_id': device_id,
+        'time': datetime.utcnow(),
         'temperature': temperature,
         'humidity': humidity,
         'pressure': pressure,
@@ -106,13 +96,16 @@ def main():
     logger.info("Waiting for database to be ready...")
     wait_for_db()
     
-    logger.info("Ensuring devices exist...")
-    ensure_devices_exist(100)  # Asegurarse de que existan 100 dispositivos
-    
     logger.info("Starting data generation...")
     while True:
         try:
             data = generate_sensor_data()
+            device_id = data['device_id']
+            
+            # Ensure device exists before inserting sensor data
+            ensure_device_exists(device_id)
+            
+            # Insert sensor data
             with engine.connect() as conn:
                 conn.execute(
                     text("""
@@ -127,6 +120,8 @@ def main():
                     """),
                     data
                 )
+            
+            logger.info(f"Inserted data for {device_id}: temp={data['temperature']:.1f}°C, status={data['status']}")
             time.sleep(1)  # Generate data every second
             
         except Exception as e:
