@@ -128,7 +128,7 @@ resource "aws_security_group" "lab_sg" {
 resource "aws_instance" "lab_instances" {
   count         = var.instance_count
   ami           = data.aws_ami.amazon_linux_2.id
-  instance_type = "m5.medium"
+  instance_type = "m5.large"
   key_name      = aws_key_pair.lab_key.key_name
   subnet_id     = aws_subnet.lab_subnet.id
 
