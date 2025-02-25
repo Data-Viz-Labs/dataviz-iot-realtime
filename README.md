@@ -1,6 +1,6 @@
 # IoT Real-Time Data Visualization Practice
 
-This project provides a real-time IoT data visualization environment using multiple visualization tools. It simulates IoT sensor data and stores it in a time-series database, making it available through Grafana, Metabase, and Apache Superset.
+This project provides a real-time IoT data visualization environment using multiple visualization tools. It simulates IoT sensor data and stores it in a time-series database, making it available through Grafana, Metabase, and others...
 
 ## Components
 
@@ -8,7 +8,6 @@ This project provides a real-time IoT data visualization environment using multi
 - TimescaleDB: Time-series database for storing sensor data
 - Grafana: Real-time monitoring dashboards
 - Metabase: Business Intelligence and Analytics
-- Apache Superset: Data exploration and visualization
 
 ## Quick Start
 
