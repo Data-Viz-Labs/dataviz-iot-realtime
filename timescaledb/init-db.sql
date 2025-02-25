@@ -10,9 +10,6 @@ GRANT ALL PRIVILEGES ON DATABASE iotdata TO iotuser;
 -- Connect to the iotdata database
 \c iotdata
 
--- Create TimescaleDB extension
-CREATE EXTENSION IF NOT EXISTS timescaledb;
-
 -- Grant privileges on all tables in schema public to iotuser
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO iotuser;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO iotuser;
@@ -66,3 +63,6 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO CURRENT_USER
 
 -- Allow creating new tables (needed for TimescaleDB hypertables)
 GRANT CREATE ON SCHEMA public TO CURRENT_USER;
+
+-- Create TimescaleDB extension
+CREATE EXTENSION IF NOT EXISTS timescaledb;
