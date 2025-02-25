@@ -4,6 +4,10 @@ services:
   timescaledb:
     build: 
       context: ./timescaledb
+    environment:
+      POSTGRES_DB: iotdata
+      POSTGRES_USER: iotuser
+      POSTGRES_PASSWORD: iotpass
     ports:
       - "5432:5432"
     volumes:
