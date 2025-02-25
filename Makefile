@@ -15,10 +15,14 @@ restart: stop start
 clean:
 	$(COMPOSE_CMD) down
 	rm -rf config/metabase/metabase-data/*
+	# Remove custom built images
+	$(CONTAINER_ENGINE) rmi -f iot-real-time-data-visualization_data_generator iot-real-time-data-visualization_timescaledb 2>/dev/null || true
 
 clean-all:
 	$(COMPOSE_CMD) down -v
 	rm -rf config/metabase/metabase-data/*
+	# Remove custom built images
+	$(CONTAINER_ENGINE) rmi -f iot-real-time-data-visualization_data_generator iot-real-time-data-visualization_timescaledb 2>/dev/null || true
 
 logs:
 	$(COMPOSE_CMD) logs -f
