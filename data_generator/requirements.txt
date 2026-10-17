@@ -1,4 +1,4 @@
 psycopg2-binary==2.9.13
 faker==40.41.0
-numpy==2.5.3
+numpy==2.5.4
 sqlalchemy==2.0.23
